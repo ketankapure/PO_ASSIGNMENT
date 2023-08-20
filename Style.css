@@ -1,0 +1,57 @@
+﻿/* Apply custom styles to the form */
+.container {
+	max-width: 500px;
+	margin: 0 auto;
+	padding: 20px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+	margin-bottom: 20px;
+}
+
+.form-check-label {
+	padding-left: 5px;
+}
+
+/* Style the buttons */
+.btn {
+	margin-right: 10px;
+}
+
+/* Style the form inputs */
+.form-control {
+	width: 100%;
+	padding: 8px;
+	font-size: 14px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+	transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+	.form-control:focus {
+		border-color: #80bdff;
+		box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+	}
+
+/* Style the checkbox */
+.form-check-input {
+	margin-top: 6px;
+}
+
+/* Style error messages */
+.error-message {
+	color: red;
+	font-size: 12px;
+	margin-top: 5px;
+}
+
+/* Style success messages */
+.success-message {
+	color: green;
+	font-size: 14px;
+	margin-top: 10px;
+}
