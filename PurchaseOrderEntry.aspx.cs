@@ -142,7 +142,7 @@ namespace PO_ASSIGNMENT
                     codeOptions.Add(option);
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
 
             }
