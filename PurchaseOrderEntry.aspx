@@ -9,6 +9,20 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -17,7 +31,7 @@
 				<h1>Purchase Order Entry Form</h1>
 			</div>
 			<div class="col-md-6 text-right">
-				<button type="button" class="btn btn-primary" id="btnPurchaseSave" onclick="return savePurchaseOrder();">Save</button>
+				<button type="button" class="btn btn-primary" id="btnPurchaseSave">Save</button>
 				<button type="button" class="btn btn-secondary">Cancel</button>
 			</div>
 		</div>
@@ -85,7 +99,7 @@
 				<div class="col-md-6">
 					<div class="form-group">
 						<label for="rate">Rate</label>
-						<input type="number" class="form-control" id="rate" name="rate" required>
+						<input type="number" class="form-control" id="rate"  name="rate" required>
 					</div>
 				</div>
 			</div>
@@ -93,7 +107,7 @@
 				<div class="col-md-6">
 					<div class="form-group">
 						<label for="amount">Amount</label>
-						<input type="number" class="form-control" id="amount" name="amount" required>
+						<input type="number" class="form-control" id="amount" name="amount" readonly required>
 					</div>
 				</div>
 				<div class="col-md-6">
@@ -111,7 +125,7 @@
 			</div>
             <!-- Add Line, Update Line, Remove Line buttons here -->
 
-            <table class="table" id="orderTable">
+            <table class="table" id="orderTable" >
                 <thead>
                     <tr>
                         <th>Select</th>
@@ -134,6 +148,18 @@
 
              $("#unit").prop("readonly", true);
 
+             $("#quantity, #rate").on("input", function () {
+                 calculateAmount();
+             });
+
+
+             function calculateAmount() {
+                 const quantity = parseFloat($("#quantity").val()) || 0;
+                 const rate = parseFloat($("#rate").val()) || 0;
+                 const amount = (quantity * rate).toFixed(2);
+                 $("#amount").val(amount);
+             }
+
              loadVendorDropdown();
              loadCodeDropdown();
              loadShortTextDropdown();
@@ -146,27 +172,82 @@
          //Add Button
          $("#addLineBtn").click(function () {
              debugger;
+             var isValid = validateAddLine(); // Call a function to perform validation
 
-             function calculateAmount(quantity, rate) {
-                 // Assuming quantity and rate are numbers
-                 var numericQuantity = parseFloat(quantity);
-                 var numericRate = parseFloat(rate);
-
-                 // Calculate the amount
-                 var amount = numericQuantity * numericRate;
-
-                 // Return the calculated amount
-                 return amount.toFixed(2); // Return amount with two decimal places
+             if (isValid) {
+                 // Add a new row to the table
+                 addNewRow();
+             } else {
+                 alert("Please fill in all required fields before adding a new line.");
              }
 
+         });
+            
+		 //Update Button 
+         $("#updateLineBtn").click(function () {
+             debugger;
+
+             var isValid = validateUpdateLine(); // Call a function to perform validation
+
+             if (isValid) {
+                 // Update the selected row
+                 updateSelectedRow();
+             } else {
+                 alert("Please select a row and fill in all required fields before updating.");
+             }
+
+             
+         });
+
+         //Remove Button
+         $("#removeLineBtn").click(function () {
+
+             var isValid = validateRemoveLine(); // Call a function to perform validation
+
+             if (isValid) {
+                 // Remove the selected row
+                 removeSelectedRow();
+             } else {
+                 alert("Please select a row before removing.");
+             }
+
+         });
+
+         // Example validation functions (replace with your logic)
+         function validateAddLine() {
+             // Example: Check if required fields are filled for adding a new line
+             var quantity = $("#quantity").val();
+             var rate = $("#rate").val();
+             return quantity !== "" && rate !== "";
+         }
+
+         function validateUpdateLine() {
+             // Example: Check if a row is selected and required fields are filled for updating
+             var selectedRow = $("#orderTable").find(".selectRow:checked").closest("tr");
+             if (selectedRow.length === 0) {
+                 return false;
+             }
+
+             var quantityInput = selectedRow.find("td:eq(2) input");
+             var rateInput = selectedRow.find("td:eq(3) input");
+             return quantityInput.val() !== "" && rateInput.val() !== "";
+         }
+
+         function validateRemoveLine() {
+             // Example: Check if a row is selected for removing
+             var selectedRow = $("#orderTable").find(".selectRow:checked").closest("tr");
+             return selectedRow.length > 0;
+         }
+
+         function addNewRow() {
              // Get values from textboxes
              var materialCode = $("#code").val();
              var quantity = $("#quantity").val();
              var rate = $("#rate").val();
-             var amount = calculateAmount(quantity, rate); // Implement this function
+             var amount = $("#amount").val(); // Implement this function
              var expectedDate = $("#expectedDate").val();
 
-             
+
 
              // Create a new row and append it to the table
              var newRow = $("<tr>");
@@ -182,44 +263,50 @@
              $("#code").val("");
              $("#quantity").val("");
              $("#rate").val("");
+             $("#amount").val("");
              $("#expectedDate").val("");
-         });
-            
-		 //Update Button 
-         $("#updateLineBtn").click(function () {
+         }
+
+         function updateSelectedRow() {
              // Find the selected checkbox
              var selectedRow = $("#orderTable").find(".selectRow:checked").closest("tr");
 
-             // Make the cells in the selected row editable
-             selectedRow.find("td:not(:first-child)").each(function () {
-                 var cellValue = $(this).text();
-                 $(this).html("<input type='text' class='editCell' value='" + cellValue + "'>");
-             });
-         });
+             // Check if the cells in the selected row are already editable
+             var cellsEditable = selectedRow.find(".editCell").length > 0;
 
-         //Remove Button
-         $("#removeLineBtn").click(function () {
+             // Toggle between making cells editable and read-only
+             if (!cellsEditable) {
+                 // Make the cells in the selected row editable
+                 selectedRow.find("td:not(:first-child)").each(function (index) {
+                     if (index !== 0 && index !== 3) { // Exclude the code column (index 1)
+                         var cellValue = $(this).text();
+                         $(this).html("<input type='text' class='editCell' value='" + cellValue + "'>");
+                     }
+                 });
+             } else {
+                 // Calculate and update the amount
+                 var quantityInput = parseFloat(selectedRow.find("td:eq(2) input").val()) || 0;
+                 var rateInput = parseFloat(selectedRow.find("td:eq(3) input").val()) || 0;
+                 var amountCell = selectedRow.find("td:eq(4)");
+                 var amount = (quantityInput * rateInput).toFixed(2);
+                 amountCell.text(amount);
+
+                 // Set the cells back to text elements
+                 selectedRow.find(".editCell").each(function () {
+                     var cellValue = $(this).val();
+                     $(this).replaceWith(cellValue);
+                 });
+             }
+         }
+
+         function removeSelectedRow() {
+
              // Find selected rows and remove them
              $("#orderTable").find(".selectRow:checked").closest("tr").remove();
-         });
+         }
 
-         //Save Button
-         $("#saveBtn").click(function () {
-             var tableData = [];
-             $("#orderTable tbody tr").each(function () {
-                 var row = $(this);
-                 var rowData = {
-                     materialCode: row.find("td:eq(1)").text(),
-                     quantity: row.find("td:eq(2)").text(),
-                     rate: row.find("td:eq(3)").text(),
-                     amount: row.find("td:eq(4)").text(),
-                     expectedDate: row.find("td:eq(5)").text()
-                 };
-                 tableData.push(rowData);
-             });
+         var selectedVendorCode;
 
-             // Perform further processing, e.g., send data to server
-         });
          function loadVendorDropdown() {
              $.ajax({
                  type: "POST",
@@ -233,7 +320,7 @@
                      var dropdown = $("#vendor");
                      dropdown.empty(); // Clear existing options
                      dropdown.append($("<option>").attr("value", "").text("Select a vendor"));
-
+                     selectedVendorCode = response.d.Code;
                      // Populate the dropdown with vendor names
                      $.each(vendors, function (index, vendor) {
                          dropdown.append($("<option>").attr("value", vendor.Code).text(vendor.VendorName));
@@ -250,90 +337,6 @@
                  }
              });
 
-         }
-
-		 function savePurchaseOrder() {
-
-             var ddCodeSelectedValue;
-             var ddShortTextSelectedValue;
-
-             var selectedVendorID = $("#vendor").val();
-
-             $("#code").change(function () {
-                 ddCodeSelectedValue = $(this).val(); // Gets the selected value
-                 console.log("Selected Code ID: " + ddCodeSelectedValue);
-             });
-
-             $("#shortText").change(function () {
-                 ddShortTextSelectedValue = $(this).val(); // Gets the selected value
-                 console.log("Selected Code ID: " + ddShortTextSelectedValue);
-             });
-
-             var orderNumber = $("#orderNumber").val();
-             var orderDate = $("#orderDate").val();
-             var orderNumber = $("#orderNumber").val(); //vendor ID
-             var notes = $("#notes").val();
-             var orderValue = $("#orderValue").val();  
-             //var orderNumber = $("#orderNumber").val(); //order status
-             //var selectedValue = $("#orderNumber").val(); // Material code
-             var itemQuantity = $("#quantity").val();   // itemQuantity
-             var itemRate = $("#rate").val();
-             var expectedDate = $("#expectedDate").val();
-
-             var requestData = {
-                 OrderNumber: orderNumber,
-                 OrderDate: orderDate,
-                 VendorID: selectedVendorID, //vendorID
-                 Notes: notes,
-                 OrderValue: orderValue,
-                 //Number: contactNumber,     //order status handle with server side
-                 MaterialCode: ddCodeSelectedValue,
-                 ItemRate: itemRate,
-                 //IsActive: itemValue,       //itemValue handle with server side
-                 ShortText: ddShortTextSelectedValue,
-                 ExpectedDate: expectedDate
-             };
-
-             //string orderNumber,
-             //    DateTime orderDate,
-             //        int vendorID,
-             //            string notes,
-             //                decimal orderValue,
-             //                    string orderStatus,
-             //                        int materialID,
-             //                            int itemQuantity,
-             //                                decimal itemRate,
-             //                                    decimal itemValue,
-             //                                        string itemNotes,
-             //                                            DateTime expectedDate,
-
-
-             $.ajax({
-                 type: "POST",
-                 url: "VendorEntryForm.aspx" + "/SavePurchaseOrder", // Change to your server-side method URL
-                 data: JSON.stringify({ orderData: requestData }),
-                 contentType: "application/json; charset=utf-8",
-                 async: false,
-                 cache: false,
-                 dataType: "json",
-                 success: function (response) {
-                     // Handle the server response
-                     if (response.d === "success") {
-                         alert("Order submitted successfully!");
-                         // Clear form inputs or perform other actions
-                     } else if (response.d.startsWith("error")) {
-                         var errorMessage = response.d.substring(6); // Remove "error: " prefix
-                         alert("Error: " + errorMessage);
-                     } else {
-                         alert("Unknown response: " + response.d);
-                     }
-                 },
-                 error: function (xhr, status, error) {
-                     console.error(error);
-                     console.log(xhr); // Log the xhr object for more details
-                     alert("An error occurred during the AJAX request. Check the console for details.");
-                 }
-             });
          }
 
          function loadCodeDropdown() {
@@ -392,7 +395,6 @@
          }
 
          function updateUnit() {
-             debugger;
              var selectedDdCode = $("#code").val();
              var selectedShortText = $("#shortText").val();
 
@@ -417,9 +419,171 @@
                  });
              } else {
                  $("#unit").val("");
-                 
+
              }
          }
+
+         $("#btnPurchaseSave").click(function () {
+             debugger;
+             // Perform input validations before saving
+
+             var isValid = true;
+
+             // Validate Order Date
+             var orderDate = $("#orderDate").val();
+             if (orderDate === "") {
+                 isValid = false;
+                 alert("Please select an Order Date.");
+                 return;
+             }
+
+             // Validate Vendor dropdown
+             var selectedVendor = $("#vendor").val();
+             if (selectedVendor === "") {
+                 isValid = false;
+                 alert("Please select a Vendor.");
+                 return;
+             }
+
+             // Validate Notes textarea
+             var notes = $("#notes").val();
+             if (notes === "") {
+                 isValid = false;
+                 alert("Please enter Notes.");
+                 return;
+             }
+
+             // Validate Order Value
+             var orderValue = $("#orderValue").val();
+             if (orderValue === "") {
+                 isValid = false;
+                 alert("Please enter Order Value.");
+                 return;
+             }
+
+             //// Validate Material code dropdown
+             //var selectedMaterialCode = $("#code").val();
+             //if (selectedMaterialCode === "") {
+             //    isValid = false;
+             //    alert("Please select a Material Code.");
+             //    return;
+             //}
+
+             //// Validate Short Text dropdown
+             //var selectedShortText = $("#shortText").val();
+             //if (selectedShortText === "") {
+             //    isValid = false;
+             //    alert("Please select a Short Text.");
+             //    return;
+             //}
+
+             //// Validate Quantity
+             //var quantity = $("#quantity").val();
+             //if (quantity === "") {
+             //    isValid = false;
+             //    alert("Please enter Quantity.");
+             //    return;
+             //}
+
+             //// Validate Rate
+             //var rate = $("#rate").val();
+             //if (rate === "") {
+             //    isValid = false;
+             //    alert("Please enter Rate.");
+             //    return;
+             //}
+
+             //// Validate Expected Date
+             //var expectedDate = $("#expectedDate").val();
+             //if (expectedDate === "") {
+             //    isValid = false;
+             //    alert("Please select an Expected Date.");
+             //    return;
+             //}
+
+             // If all validations pass, proceed with saving
+             if (isValid) {
+                 var ddCodeSelectedValue;
+                 var ddShortTextSelectedValue;
+                 $("#code").change(function () {
+                     ddCodeSelectedValue = $(this).val(); // Gets the selected value
+                     console.log("Selected Code ID: " + ddCodeSelectedValue);
+                 });
+
+                 $("#shortText").change(function () {
+                     ddShortTextSelectedValue = $(this).val(); // Gets the selected value
+                     console.log("Selected Code ID: " + ddShortTextSelectedValue);
+                 });
+                 var orderNumber = $("#orderNumber").val();
+
+                 var tableData = [];
+                 $("#orderTable tbody tr").each(function () {
+                     var row = $(this);
+                     var rowData = {
+                         materialCode: row.find("td:eq(1)").text(),
+                         quantity: row.find("td:eq(2)").text(),
+                         rate: row.find("td:eq(3)").text(),
+                         amount: row.find("td:eq(4)").text(),
+                         expectedDate: row.find("td:eq(5)").text()
+                     };
+                     tableData.push(rowData);
+                 });
+
+                 var requestData = {
+                     OrderNumber: orderNumber,
+                     OrderDate: orderDate,
+                     VendorID: selectedVendorCode, //vendorID
+                     Notes: notes,
+                     OrderValue: orderValue,
+                     ShortText: ddShortTextSelectedValue,
+                     TableData: tableData
+                 };
+                 // Call the AJAX method to save the data
+                 savePurchaseOrder(requestData);
+             }
+         });
+
+         function savePurchaseOrder() {
+             debugger;
+             $.ajax({
+                 type: "POST",
+                 url: "YourWebService.asmx/SavePurchaseOrder",  
+                 data: JSON.stringify({ purchaseOrder: requestData }),
+                 contentType: "application/json; charset=utf-8",
+                 dataType: "json",
+                 success: function (response) {
+                     // Handle success, such as showing a success message
+                     alert("Purchase order saved successfully!");
+                 },
+                 error: function (xhr, status, error) {
+                     console.error(error);
+                     console.log(xhr); // Log the xhr object for more details
+                     alert("An error occurred during the AJAX request. Check the console for details.");
+                 }
+             });
+
+
+
+             
+
+             //string orderNumber,
+             //    DateTime orderDate,
+             //        int vendorID,
+             //            string notes,
+             //                decimal orderValue,
+             //                    string orderStatus,
+             //                        int materialID,
+             //                            int itemQuantity,
+             //                                decimal itemRate,
+             //                                    decimal itemValue,
+             //                                        string itemNotes,
+             //                                            DateTime expectedDate,
+
+
+             
+         }
+
+         
 		
 		
 		 // Attach event listener to the Remove Line button

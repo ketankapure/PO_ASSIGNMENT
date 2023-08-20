@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Web.Services;
@@ -10,6 +11,7 @@ namespace PO_ASSIGNMENT
 {
     public partial class PurchaseOrderEntry : System.Web.UI.Page
     {
+        private string connectionString = ConfigurationManager.ConnectionStrings["PurchaseOrderDB"].ConnectionString;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
@@ -142,7 +144,7 @@ namespace PO_ASSIGNMENT
                     codeOptions.Add(option);
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
 
             }
@@ -150,8 +152,86 @@ namespace PO_ASSIGNMENT
             return codeOptions;
         }
 
-        public class OrderData { 
-            
+        [WebMethod]
+        public string SavePurchaseOrder(PurchaseOrderViewModel purchaseOrder)
+        {
+            try
+            {
+                ExecuteInsertPurchaseOrderProcedure(purchaseOrder.Header, purchaseOrder.Details);
+                return "Purchase order saved successfully";
+            }
+            catch (Exception ex)
+            {
+                return "An error occurred while saving the purchase order: " + ex.Message;
+            }
+
+        }
+
+        private void ExecuteInsertPurchaseOrderProcedure(PurchaseOrderHeader header, List<PurchaseOrderDetail> details)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand("InsertPurchaseOrder", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@OrderNumber", header.OrderNumber);
+                    command.Parameters.AddWithValue("@OrderDate", header.OrderDate);
+                    command.Parameters.AddWithValue("@VendorID", header.VendorID);
+                    command.Parameters.AddWithValue("@Notes", header.Notes);
+                    command.Parameters.AddWithValue("@OrderValue", header.OrderValue);
+                    // Add other header parameters
+
+                    // Create a table-valued parameter for details
+                    DataTable detailsTable = new DataTable();
+                    detailsTable.Columns.Add("MaterialID", typeof(int));
+                    detailsTable.Columns.Add("Quantity", typeof(decimal));
+                    detailsTable.Columns.Add("Rate", typeof(decimal));
+                    detailsTable.Columns.Add("Amount", typeof(decimal));
+                    detailsTable.Columns.Add("ExpectedDate", typeof(DateTime));
+
+                    foreach (var detail in details)
+                    {
+                        detailsTable.Rows.Add(detail.MaterialID, detail.ItemQuantity, detail.ItemRate, detail.ItemValue, detail.ExpectedDate);
+                    }
+
+                    SqlParameter detailsParam = command.Parameters.AddWithValue("@Details", detailsTable);
+                    detailsParam.SqlDbType = SqlDbType.Structured;
+
+                    // Execute the command
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+
+        public class PurchaseOrderViewModel
+        {
+            public PurchaseOrderHeader Header { get; set; }
+            public List<PurchaseOrderDetail> Details { get; set; }
+        }
+
+        public class PurchaseOrderDetail
+        {
+            public int OrderID { get; set; }
+            public string MaterialID { get; set; }
+            public int ItemQuantity { get; set; }
+            public decimal ItemRate { get; set; }
+            public decimal ItemValue { get; set; }
+            public string ItemNotes { get; set; }
+            public DateTime ExpectedDate { get; set; }
+        }
+
+        public class PurchaseOrderHeader
+        {
+            public int ID { get; set; }
+            public string OrderNumber { get; set; }
+            public DateTime OrderDate { get; set; }
+            public string VendorID { get; set; }
+            public string Notes { get; set; }
+            public decimal OrderValue { get; set; }
+            public string OrderStatus { get; set; }
         }
 
         public class Vendor
