@@ -30,11 +30,7 @@ namespace PO_ASSIGNMENT
 
         }
 
-        //[WebMethod]
-        //public static string SavePurchaseOrder(OrderData orderData) 
-        //{ 
 
-        //}
 
 
         [WebMethod]
@@ -157,7 +153,7 @@ namespace PO_ASSIGNMENT
         {
             try
             {
-                ExecuteInsertPurchaseOrderProcedure(purchaseOrder.Header, purchaseOrder.Details);
+                ExecuteInsertPurchaseOrderProcedure(purchaseOrder.Header, purchaseOrder.TableData);
                 return "Purchase order saved successfully";
             }
             catch (Exception ex)
@@ -185,21 +181,22 @@ namespace PO_ASSIGNMENT
 
                     // Create a table-valued parameter for details
                     DataTable detailsTable = new DataTable();
-                    detailsTable.Columns.Add("MaterialID", typeof(int));
+                    detailsTable.Columns.Add("OrderNumber", typeof(string));
+                    detailsTable.Columns.Add("MaterialID", typeof(string));
                     detailsTable.Columns.Add("Quantity", typeof(decimal));
                     detailsTable.Columns.Add("Rate", typeof(decimal));
                     detailsTable.Columns.Add("Amount", typeof(decimal));
+                    detailsTable.Columns.Add("ShortText", typeof(string));
                     detailsTable.Columns.Add("ExpectedDate", typeof(DateTime));
 
                     foreach (var detail in details)
                     {
-                        detailsTable.Rows.Add(detail.MaterialID, detail.ItemQuantity, detail.ItemRate, detail.ItemValue, detail.ExpectedDate);
+                        detailsTable.Rows.Add(detail.OrderNumber,detail.MaterialCode, detail.ItemQuantity, detail.ItemRate, detail.ItemValue,detail.ItemNotes, detail.ExpectedDate);
                     }
 
                     SqlParameter detailsParam = command.Parameters.AddWithValue("@Details", detailsTable);
                     detailsParam.SqlDbType = SqlDbType.Structured;
 
-                    // Execute the command
                     command.ExecuteNonQuery();
                 }
             }
@@ -209,13 +206,14 @@ namespace PO_ASSIGNMENT
         public class PurchaseOrderViewModel
         {
             public PurchaseOrderHeader Header { get; set; }
-            public List<PurchaseOrderDetail> Details { get; set; }
+            public List<PurchaseOrderDetail> TableData { get; set; }
+
         }
 
         public class PurchaseOrderDetail
         {
-            public int OrderID { get; set; }
-            public string MaterialID { get; set; }
+            public string OrderNumber { get; set; }
+            public string MaterialCode { get; set; }
             public int ItemQuantity { get; set; }
             public decimal ItemRate { get; set; }
             public decimal ItemValue { get; set; }
@@ -225,13 +223,13 @@ namespace PO_ASSIGNMENT
 
         public class PurchaseOrderHeader
         {
-            public int ID { get; set; }
             public string OrderNumber { get; set; }
             public DateTime OrderDate { get; set; }
             public string VendorID { get; set; }
             public string Notes { get; set; }
             public decimal OrderValue { get; set; }
             public string OrderStatus { get; set; }
+            public string ItemNotes { get; set; }
         }
 
         public class Vendor

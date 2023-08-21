@@ -63,37 +63,7 @@ namespace PO_ASSIGNMENT
             public string Number { get; set; }
             public DateTime ValidDate { get; set; }
             public bool IsActive { get; set; }
-
-            // Add more properties as needed
-        }
-
-        //protected void btnSave_Click(object sender, EventArgs e)
-        //{
-        //    try
-        //    {
-        //        DatabaseUtility dbUtility = new DatabaseUtility();
-
-        //        string code = txtVendorCode.Value;
-        //        string name = txtVendorName.Value;
-        //        string addressLine1 = txtAddressLine1.Value;
-        //        string addressLine2 = txtAddressLine2.Value;
-        //        string contactEmail = txtContactEmail.Value;
-        //        string contactNo = txtContactNumber.Value;
-        //        DateTime validTillDate = DateTime.Parse(txtValidTillDate.Value);
-        //        bool isActive = chkIsActive.Checked;
-
-        //        dbUtility.ExecuteVendorInsertProcedure(code, name, addressLine1, addressLine2, contactEmail, contactNo, validTillDate, isActive);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-
-        //}
-
-        protected void btnCancel_Click(object sender, EventArgs e)
-        {
-            // Cancel button click logic here
+            
         }
     }
 }

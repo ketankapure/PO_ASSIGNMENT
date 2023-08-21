@@ -60,7 +60,6 @@
         </form>
     </div>
     <script>
-        // Client-side validation and submission can be added here
         $(document).ready(function () {
             debugger;
 		});
@@ -94,7 +93,7 @@
 
 			$.ajax({
 				type: "POST",
-				url: "MaterialEntryForm.aspx" + "/InsertMaterialOrder", // Change to your server-side method URL
+				url: "MaterialEntryForm.aspx" + "/InsertMaterialOrder", 
 				data: JSON.stringify({ orderData: requestData }),
 				contentType: "application/json; charset=utf-8",
 				async: false,
@@ -106,7 +105,7 @@
 						alert("Material submitted successfully!");
 						// Clear form inputs or perform other actions
 					} else if (response.d.startsWith("error")) {
-						var errorMessage = response.d.substring(6); // Remove "error: " prefix
+						var errorMessage = response.d.substring(6); 
 						alert("Error: " + errorMessage);
 					} else {
 						alert("Unknown response: " + response.d);
@@ -114,7 +113,7 @@
 				},
 				error: function (xhr, status, error) {
 					console.error(error);
-					console.log(xhr); // Log the xhr object for more details
+					console.log(xhr); 
 					alert("An error occurred during the AJAX request. Check the console for details.");
 				}
             });

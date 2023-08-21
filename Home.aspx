@@ -4,10 +4,8 @@
 <html>
 <head>
     <title>Home Page</title>
-    <!-- Include Bootstrap CSS link here -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        /* Custom CSS */
         body {
             background-color: #f8f9fa;
         }
@@ -42,7 +40,6 @@
         </div>
     </div>
 
-    <!-- Include Bootstrap and JavaScript links here -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
 		document.getElementById("vendorEntryBtn").addEventListener("click", function () {

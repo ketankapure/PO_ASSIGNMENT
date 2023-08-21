@@ -16,12 +16,10 @@
 	padding-left: 5px;
 }
 
-/* Style the buttons */
 .btn {
 	margin-right: 10px;
 }
 
-/* Style the form inputs */
 .form-control {
 	width: 100%;
 	padding: 8px;
@@ -37,19 +35,16 @@
 		box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 	}
 
-/* Style the checkbox */
 .form-check-input {
 	margin-top: 6px;
 }
 
-/* Style error messages */
 .error-message {
 	color: red;
 	font-size: 12px;
 	margin-top: 5px;
 }
 
-/* Style success messages */
 .success-message {
 	color: green;
 	font-size: 14px;

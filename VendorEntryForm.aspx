@@ -7,14 +7,12 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-         /* Chrome, Safari, Edge, Opera */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
 
-        /* Firefox */
         input[type=number] {
             -moz-appearance: textfield;
         }
@@ -103,35 +101,30 @@
 
 				var isValid = true;
 
-				// Validate Vendor Code
 				var vendorCode = $("#txtVendorCode").val();
 				if (vendorCode.trim() === "") {
 					$("#vendorCodeError").text("Vendor Code is required.");
 					isValid = false;
 				}
 
-				// Validate Name
 				var name = $("#txtVendorName").val();
 				if (name.trim() === "") {
 					$("#nameError").text("Name is required.");
 					isValid = false;
 				}
 
-				// Validate Address Line 1
 				var addressLine1 = $("#txtAddressLine1").val();
 				if (addressLine1.trim() === "") {
 					$("#addressLine1Error").text("Address Line 1 is required.");
 					isValid = false;
 				}
 
-				// Validate Address Line 2
 				var addressLine2 = $("#txtAddressLine2").val();
 				if (addressLine2.trim() === "") {
 					$("#addressLine2Error").text("Address Line 2 is required.");
 					isValid = false;
 				}
 
-				// Validate Contact Email
 				var contactEmail = $("#txtContactEmail").val();
 				if (contactEmail.trim() === "") {
 					$("#contactEmailError").text("Contact Email is required.");
@@ -142,7 +135,6 @@
 				}
 
 
-				// Validate Contact Number
 				var contactNumber = $("#txtContactNumber").val();
 				if (contactNumber.trim() === "") {
 					$("#contactNumberError").text("Contact Number is required.");
@@ -152,19 +144,13 @@
 					isValid = false;
 				}
 
-				// Validate Valid Till Date
 				var validTillDate = $("#txtValidTillDate").val();
 				if (validTillDate.trim() === "") {
 					$("#validTillDateError").text("Valid Till Date is required.");
 					isValid = false;
 				}
 
-
-
-				// If all validations passed, submit the form
 				if (isValid) {
-					// Perform form submission or other actions here
-					// For demonstration purposes, let's show a success message
 					$("#successMessage").text("Form submitted successfully!");
 				}
 
@@ -183,55 +169,85 @@
 				};
 				$.ajax({
 					type: "POST",
-					url: "VendorEntryForm.aspx" + "/InsertVendorOrder", // Change to your server-side method URL
+					url: "VendorEntryForm.aspx" + "/InsertVendorOrder", 
 					data: JSON.stringify({ orderData: requestData }),
 					contentType: "application/json; charset=utf-8",
 					async: false,
 					cache: false,
 					dataType: "json",
 					success: function (response) {
-						// Handle the server response
 						if (response.d === "success") {
 							alert("Order submitted successfully!");
-							// Clear form inputs or perform other actions
-						} else if (response.d.startsWith("error")) {
-							var errorMessage = response.d.substring(6); // Remove "error: " prefix
-							alert("Error: " + errorMessage);
-						} else {
-							alert("Unknown response: " + response.d);
+                            var vendorData = {
+                                vendorCode: vendorCode,
+                                name: name,
+                                number: contactNumber,
+                                email: contactEmail,
+                                validTillDate: validTillDate,
+                                isActive: isActive
+                            };
+
+
+                            localStorage.setItem('newVendor', JSON.stringify(vendorData));
+						}
+						else {
+
 						}
 					},
+
+
 					error: function (xhr, status, error) {
 						console.error(error);
-						console.log(xhr); // Log the xhr object for more details
+						console.log(xhr); 
 						alert("An error occurred during the AJAX request. Check the console for details.");
 					}
 				});
+
+              
+                window.close();
 			}
 
-			// Clear error messages
 			function clearErrorMessages() {
 				$(".error-message").text("");
             }
 
-			// Email validation function
 			function isValidEmail(email) {
-				// Basic email format validation using regular expression
 				var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 				return emailPattern.test(email);
 			}
 
-			// Contact Number validation function
 			function isValidContactNumber(number) {
-				// Basic contact number format validation using regular expression
-				// This example allows numbers with optional dashes or spaces
 				var contactNumberPattern = /^(\d{10}|\d{3}-\d{4}-\d{3}|\d{3} \d{4} \d{3})$/;
 				//var contactNumberPattern = /^(?:\+?\d{1,3})?(?:[\s-]?\d{10,12})$/;
 				return contactNumberPattern.test(number);
 			}
 
+
 		});
-	</script>
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var vendorCode = urlParams.get("vendorCode");
+
+        populateFormWithVendorDetails(vendorCode);
+        function populateFormWithVendorDetails(vendorCode) {
+            var vendorData = {
+                vendorCode: vendorCode,
+                name: name,
+                number: contactNumber,
+                email: contactEmail,
+                validTillDate: validTillDate,
+                isActive: isActive
+            };
+            var vendorData = getVendorDataFromDataSource(vendorCode);
+            document.getElementById("txtVendorCode").value = vendorData.vendorCode;
+            document.getElementById("txtVendorName").value = vendorData.name;
+            document.getElementById("txtContactNumber").value = vendorData.number;
+            document.getElementById("txtContactEmail").value = vendorData.email;
+            document.getElementById("txtValidTillDate").value = vendorData.validTillDate;
+            var isActiveCheckbox = document.getElementById("chkIsActive");
+            isActiveCheckbox.checked = vendorData.isActive;
+        }
+    </script>
 
 </body>
 </html>
