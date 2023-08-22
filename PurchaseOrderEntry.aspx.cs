@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Web.Script.Services;
 using System.Web.Services;
 using Newtonsoft.Json;
 
@@ -11,7 +12,6 @@ namespace PO_ASSIGNMENT
 {
     public partial class PurchaseOrderEntry : System.Web.UI.Page
     {
-        private string connectionString = ConfigurationManager.ConnectionStrings["PurchaseOrderDB"].ConnectionString;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
@@ -149,7 +149,8 @@ namespace PO_ASSIGNMENT
         }
 
         [WebMethod]
-        public string SavePurchaseOrder(PurchaseOrderViewModel purchaseOrder)
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static string SavePurchaseOrder(PurchaseOrderViewModel purchaseOrder)
         {
             try
             {
@@ -162,46 +163,6 @@ namespace PO_ASSIGNMENT
             }
 
         }
-
-        private void ExecuteInsertPurchaseOrderProcedure(PurchaseOrderHeader header, List<PurchaseOrderDetail> details)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                using (SqlCommand command = new SqlCommand("InsertPurchaseOrder", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@OrderNumber", header.OrderNumber);
-                    command.Parameters.AddWithValue("@OrderDate", header.OrderDate);
-                    command.Parameters.AddWithValue("@VendorID", header.VendorID);
-                    command.Parameters.AddWithValue("@Notes", header.Notes);
-                    command.Parameters.AddWithValue("@OrderValue", header.OrderValue);
-                    // Add other header parameters
-
-                    // Create a table-valued parameter for details
-                    DataTable detailsTable = new DataTable();
-                    detailsTable.Columns.Add("OrderNumber", typeof(string));
-                    detailsTable.Columns.Add("MaterialID", typeof(string));
-                    detailsTable.Columns.Add("Quantity", typeof(decimal));
-                    detailsTable.Columns.Add("Rate", typeof(decimal));
-                    detailsTable.Columns.Add("Amount", typeof(decimal));
-                    detailsTable.Columns.Add("ShortText", typeof(string));
-                    detailsTable.Columns.Add("ExpectedDate", typeof(DateTime));
-
-                    foreach (var detail in details)
-                    {
-                        detailsTable.Rows.Add(detail.OrderNumber,detail.MaterialCode, detail.ItemQuantity, detail.ItemRate, detail.ItemValue,detail.ItemNotes, detail.ExpectedDate);
-                    }
-
-                    SqlParameter detailsParam = command.Parameters.AddWithValue("@Details", detailsTable);
-                    detailsParam.SqlDbType = SqlDbType.Structured;
-
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
-
 
         public class PurchaseOrderViewModel
         {
@@ -231,6 +192,68 @@ namespace PO_ASSIGNMENT
             public string OrderStatus { get; set; }
             public string ItemNotes { get; set; }
         }
+
+        private static void ExecuteInsertPurchaseOrderProcedure(PurchaseOrderHeader header, List<PurchaseOrderDetail> details)
+        {
+           string connectionString = ConfigurationManager.ConnectionStrings["PurchaseOrderDB"].ConnectionString;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    using (SqlCommand command = new SqlCommand("InsertPurchaseOrder", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@OrderNumber", header.OrderNumber);
+                        command.Parameters.AddWithValue("@MaterialIDs", "");
+                        command.Parameters.AddWithValue("@ItemQuantities", "");
+                        command.Parameters.AddWithValue("@ItemRates", "");
+                        command.Parameters.AddWithValue("@ItemValues", "");
+                        command.Parameters.AddWithValue("@ItemNotes", "");
+                        command.Parameters.AddWithValue("@ExpectedDates", "");
+                        command.Parameters.AddWithValue("@OrderDate", header.OrderDate);
+                        command.Parameters.AddWithValue("@VendorID", header.VendorID);
+                        command.Parameters.AddWithValue("@Notes", header.Notes);
+                        command.Parameters.AddWithValue("@OrderValue", header.OrderValue);
+                        command.Parameters.AddWithValue("@OrderStatus", "PENDING");
+                        // Add other header parameters
+
+                        // Create a table-valued parameter for details
+                        DataTable detailsTable = new DataTable();
+                        detailsTable.Columns.Add("OrderNumber", typeof(string));
+                        detailsTable.Columns.Add("MaterialID", typeof(string));
+                        detailsTable.Columns.Add("Quantity", typeof(decimal));
+                        detailsTable.Columns.Add("Rate", typeof(decimal));
+                        detailsTable.Columns.Add("Amount", typeof(decimal));
+                        detailsTable.Columns.Add("ShortText", typeof(string));
+                        detailsTable.Columns.Add("ExpectedDate", typeof(DateTime));
+
+                        foreach (var detail in details)
+                        {
+                            detailsTable.Rows.Add(detail.OrderNumber, detail.MaterialCode, detail.ItemQuantity, detail.ItemRate, detail.ItemValue, detail.ItemNotes, detail.ExpectedDate);
+                        }
+
+                        SqlParameter detailsParam = command.Parameters.AddWithValue("@Details", detailsTable);
+                        detailsParam.SqlDbType = SqlDbType.Structured;
+                        detailsParam.TypeName = "dbo.PurchaseOrderDetailsType";
+                        //int insertedOrderID = (int)command.ExecuteScalar();
+
+                        command.ExecuteNonQuery();
+
+                        connection.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+            
+        }
+
 
         public class Vendor
         {

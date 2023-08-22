@@ -58,7 +58,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="orderNumber">Order Number</label>
-                        <input type="text" class="form-control" id="orderNumber" name="orderNumber" required>
+                        <input type="number" class="form-control" id="orderNumber" name="orderNumber" required>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -268,6 +268,7 @@
              $("#expectedDate").val("");
          }
 
+
          function updateSelectedRow() {
              var selectedRow = $("#orderTable").find(".selectRow:checked").closest("tr");
 
@@ -396,8 +397,6 @@
              });
          }
 
-         
-
          $("#btnPurchaseSave").click(function () {
              debugger;
 
@@ -436,9 +435,19 @@
              }
 
              // If all validations pass, proceed with saving
-             if (isValid) {
+             if (isValid)
+             {
        
                  var orderNumber = $("#orderNumber").val();
+
+                 var headerData = {
+                     OrderNumber: orderNumber,
+                     OrderDate: orderDate,
+                     VendorID: selectedVendorCode, //vendorID
+                     Notes: notes,
+                     OrderValue: orderValue,
+                     ItemNotes: ddShortTextSelectedValue,
+                 };
 
                  var tableData = [];
                  $("#orderTable tbody tr").each(function () {
@@ -454,37 +463,14 @@
                  });
 
                  var requestData = {
-                     OrderNumber: orderNumber,
-                     OrderDate: orderDate,
-                     VendorID: selectedVendorCode, //vendorID
-                     Notes: notes,
-                     OrderValue: orderValue,
-                     ItemNotes: ddShortTextSelectedValue,
+                     Header: headerData,
                      TableData: tableData
                  };
                  savePurchaseOrder(requestData);
              }
          });
 
-         function savePurchaseOrder(requestData) {
-             debugger;
-             $.ajax({
-                 type: "POST",
-                 url: "PurchaseOrderEntry.aspx" + "/SavePurchaseOrder",
-                 data: JSON.stringify({ purchaseOrder: requestData }),
-                 contentType: "application/json; charset=utf-8",
-                 dataType: "json",
-                 success: function (response) {
-                     alert("Purchase order saved successfully!");
-                 },
-                 error: function (xhr, status, error) {
-                     console.error(error);
-                     console.log(xhr); 
-                     alert("An error occurred during the AJAX request. Check the console for details.");
-                 }
-             });
-
-         }
+         
 
          function updateUnit() {
              var selectedDdCode = $("#code").val();
@@ -515,6 +501,27 @@
              }
          }
 
+         function savePurchaseOrder(requestData) {
+             debugger;
+             $.ajax({
+                 type: "POST",
+                 url: "PurchaseOrderEntry.aspx" + "/SavePurchaseOrder",
+                 data: JSON.stringify({ purchaseOrder: requestData }),
+                 contentType: "application/json; charset=utf-8",
+                 dataType: "json",
+                 success: function (response) {
+                     alert("Purchase order saved successfully!");
+                 },
+                 error: function (xhr, status, error) {
+                     console.error(error);
+                     console.log(xhr);
+                     alert("An error occurred during the AJAX request. Check the console for details.");
+                 }
+             });
+
+         }
+
+
          document.getElementById("cancelButton").addEventListener("click", function () {
              $('#cancelConfirmationModal').modal('show');
          });
@@ -522,9 +529,8 @@
          document.getElementById("confirmCancel").addEventListener("click", function () {
 
 
-		 
-
-		 
+         });
+ 
      </script>
     
 </body>
