@@ -18,7 +18,8 @@ namespace PO_ASSIGNMENT
             {
                 if (!IsPostBack)
                 {
-
+                    string randomOrderNumber = GenerateRandomOrderNumber();
+                    hdnOrderNumber.Value = randomOrderNumber;
 
                 }
 
@@ -30,7 +31,13 @@ namespace PO_ASSIGNMENT
 
         }
 
-
+        private string GenerateRandomOrderNumber()
+        {
+            Random random = new Random();
+            DateTime now = DateTime.Now;
+            string orderNumber = $"{now:yyyyMM}{random.Next(100, 999)}";
+            return orderNumber;
+        }
 
 
         [WebMethod]
@@ -155,7 +162,7 @@ namespace PO_ASSIGNMENT
             try
             {
                 ExecuteInsertPurchaseOrderProcedure(purchaseOrder.Header, purchaseOrder.TableData);
-                return "Purchase order saved successfully";
+                return "success";
             }
             catch (Exception ex)
             {
@@ -207,12 +214,6 @@ namespace PO_ASSIGNMENT
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@OrderNumber", header.OrderNumber);
-                        command.Parameters.AddWithValue("@MaterialIDs", "");
-                        command.Parameters.AddWithValue("@ItemQuantities", "");
-                        command.Parameters.AddWithValue("@ItemRates", "");
-                        command.Parameters.AddWithValue("@ItemValues", "");
-                        command.Parameters.AddWithValue("@ItemNotes", "");
-                        command.Parameters.AddWithValue("@ExpectedDates", "");
                         command.Parameters.AddWithValue("@OrderDate", header.OrderDate);
                         command.Parameters.AddWithValue("@VendorID", header.VendorID);
                         command.Parameters.AddWithValue("@Notes", header.Notes);

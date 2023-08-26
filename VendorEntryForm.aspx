@@ -24,7 +24,7 @@
 			<h2>Vendor Entry Form</h2>
             <div class="form-group">
                 <label for="txtVendorCode">Vendor Code</label>
-                <input type="text" id="txtVendorCode" runat="server" class="form-control" />
+                <input type="number" id="txtVendorCode" runat="server" class="form-control" />
                 <span id="vendorCodeError" class="error-message"></span>
             </div>
             <div class="form-group">
@@ -52,7 +52,7 @@
             </div>
             <div class="form-group">
                 <label for="txtContactNumber">Contact Number</label>
-                <input type="text" id="txtContactNumber" runat="server" class="form-control" />
+                <input type="number" id="txtContactNumber" runat="server" class="form-control" />
                 <span id="contactNumberError" class="error-message"></span>
 
             </div>
@@ -66,7 +66,7 @@
                 <div class="form-check">
                     <input type="checkbox" id="chkIsActive" runat="server" class="form-check-input" />
                     <label class="form-check-label" for="chkIsActive">Is Active</label>
-                    <span id="vendorCodeError" class="error-message"></span>
+                    <span id="chkIsActiveError" class="error-message"></span>
                 </div>
             </div>
             <div class="form-group">

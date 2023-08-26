@@ -72,54 +72,25 @@ public class DatabaseUtility
         }
     }
 
-    public void ExecuteInsertPurchaseOrderProcedure(
-        string orderNumber,
-        DateTime orderDate,
-        int vendorID,
-        string notes,
-        decimal orderValue,
-        string orderStatus,
-        int materialID,
-        int itemQuantity,
-        decimal itemRate,
-        decimal itemValue,
-        string itemNotes,
-        DateTime expectedDate
-        )
+
+    public void DeleteVendorData(string vendorCode)      
     {
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
-            using (SqlCommand command = new SqlCommand("InsertPurchaseOrder", connection))
+            using (SqlCommand command = new SqlCommand("BindGetVendorNames", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
 
-                command.Parameters.AddWithValue("@OrderNumber", orderNumber);
-                command.Parameters.AddWithValue("@OrderDate", orderDate);
-                command.Parameters.AddWithValue("@VendorID", vendorID);
-                command.Parameters.AddWithValue("@Notes", notes);
-                command.Parameters.AddWithValue("@OrderValue", orderValue);
-                command.Parameters.AddWithValue("@OrderStatus", orderStatus);
-                command.Parameters.AddWithValue("@MaterialIDs", materialID);
-                command.Parameters.AddWithValue("@ItemQuantities", itemQuantity);
-                command.Parameters.AddWithValue("@ItemRates", itemRate);
-                command.Parameters.AddWithValue("@ItemValues", itemValue);
-                command.Parameters.AddWithValue("@ItemNotes", itemNotes);
-                command.Parameters.AddWithValue("@ExpectedDates", expectedDate);
-
-                SqlParameter insertedOrderIDParam = new SqlParameter("@InsertedOrderID", SqlDbType.Int);
-                insertedOrderIDParam.Direction = ParameterDirection.Output;
-                command.Parameters.Add(insertedOrderIDParam);
-
+                command.Parameters.AddWithValue("@type", "DELETE");
+                command.Parameters.AddWithValue("@Code", vendorCode);
                 connection.Open();
                 command.ExecuteNonQuery();
-
-                int insertedOrderID = (int)insertedOrderIDParam.Value;
-                Console.WriteLine($"Inserted Order ID: {insertedOrderID}");
             }
         }
     }
 
-    public DataTable ExecuteBindVendorStoredProcedure(string procedureName, SqlParameter[] parameters = null)
+
+    public DataTable ExecuteBindVendorStoredProcedure(string procedureName, SqlParameter[] parameters=null)
     {
         DataTable resultTable = new DataTable();
 
@@ -131,12 +102,13 @@ public class DatabaseUtility
            using (SqlCommand command = new SqlCommand(procedureName, connection))
            {
                command.CommandType = CommandType.StoredProcedure;
-                
-                if (parameters != null)
+
+                if (parameters!=null)
                 {
                     command.Parameters.AddRange(parameters);
-                }
 
+
+                }
                 using (SqlDataAdapter adapter = new SqlDataAdapter(command))
                 {
                     adapter.Fill(resultTable);

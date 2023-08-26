@@ -11,7 +11,25 @@ namespace PO_ASSIGNMENT
 {
 
 
-	public partial class PurchaseOrderEntry
-	{
-	}
+    public partial class PurchaseOrderEntry
+    {
+
+        /// <summary>
+        /// purchaseOrderForm control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlForm purchaseOrderForm;
+
+        /// <summary>
+        /// hdnOrderNumber control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnOrderNumber;
+    }
 }

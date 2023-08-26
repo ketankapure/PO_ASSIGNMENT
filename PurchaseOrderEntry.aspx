@@ -52,13 +52,32 @@
                     </div>
                 </div>
             </div>
+            <div class="modal fade" id="savealert" tabindex="-1" aria-labelledby="savealertLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="savealertLabel">Order Confirmation</h5>
+                            <button type="button"  class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Purchase order submitted successfully!
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="closeAlertBtn" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 		</div>
-        <form id="purchaseOrderForm">
+        <form id="purchaseOrderForm" runat="server">
                 <div class="form-row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="orderNumber">Order Number</label>
-                        <input type="number" class="form-control" id="orderNumber" name="orderNumber" required>
+                        <input type="number" class="form-control" id="orderNumber"  name="orderNumber" readonly required>
+                        <asp:HiddenField ID="hdnOrderNumber" ClientIDMode="Static" runat="server" />
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -178,7 +197,13 @@
              loadCodeDropdown();
              loadShortTextDropdown();
 
+             
+
 		 });
+
+         var hdnOrderNumber = document.getElementById("hdnOrderNumber");
+         var OrderNumber = document.getElementById("orderNumber");
+         OrderNumber.value = hdnOrderNumber.value;
 
          //Add Button
          $("#addLineBtn").click(function () {
@@ -457,7 +482,9 @@
                          ItemQuantity: row.find("td:eq(2)").text(),
                          ItemRate: row.find("td:eq(3)").text(),
                          ItemValue: row.find("td:eq(4)").text(),
-                         ExpectedDate: row.find("td:eq(5)").text()
+                         ExpectedDate: row.find("td:eq(5)").text(),
+                         ItemNotes: ddShortTextSelectedValue,
+                         OrderNumber: orderNumber
                      };
                      tableData.push(rowData);
                  });
@@ -510,7 +537,14 @@
                  contentType: "application/json; charset=utf-8",
                  dataType: "json",
                  success: function (response) {
-                     alert("Purchase order saved successfully!");
+                     if (response.d === "success") {
+                         document.getElementById("btnPurchaseSave").addEventListener("click", function () {
+                             $('#savealert').modal('show');
+                         });
+                     }
+                     else {
+                         alert(response.d);
+                     }
                  },
                  error: function (xhr, status, error) {
                      console.error(error);
@@ -521,14 +555,16 @@
 
          }
 
-
          document.getElementById("cancelButton").addEventListener("click", function () {
              $('#cancelConfirmationModal').modal('show');
          });
 
          document.getElementById("confirmCancel").addEventListener("click", function () {
+             window.location.href = "Home.aspx";
+         });
 
-
+         document.getElementById("closeAlertBtn").addEventListener("click", function () {
+             location.reload();
          });
  
      </script>

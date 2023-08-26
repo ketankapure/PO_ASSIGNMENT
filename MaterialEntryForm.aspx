@@ -24,6 +24,43 @@
     </style>
 </head>
 <body>
+        <div class="modal fade" id="cancelConfirmationModal" tabindex="-1" aria-labelledby="cancelConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelConfirmationModalLabel">Cancel Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to cancel? Any unsaved changes will be lost.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancel">Confirm Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="savealert" tabindex="-1" aria-labelledby="savealertLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="savealertLabel">Vendor Creation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Material submitted successfully!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="closeAlertBtn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container mt-5">
         <h2>Material Entry Form</h2>
         <form id="materialForm" runat="server">
@@ -55,7 +92,7 @@
                 <input type="checkbox" class="form-check-input" id="chkIsActive" runat="server" />
                 <label class="form-check-label" for="chkIsActive">Is Active</label>
             </div>
-            <button type="button" class="btn btn-primary" id="btnSaveClick" onclick=" return SaveMaterial();">Save</button>
+            <button type="button" class="btn btn-primary" id="btnSaveClick">Save</button>
             <button type="button" class="btn btn-secondary" id="btnCancel" runat="server">Cancel</button>
         </form>
     </div>
@@ -65,8 +102,52 @@
 		});
 
         $("#btnSaveClick").click(function () {
-            debugger;
-			//SaveMaterial();
+            var isValid = true;
+
+            // Validate Order Date
+            var txtMaterialCode = $("#txtMaterialCode").val();
+            if (txtMaterialCode === "") {
+                isValid = false;
+                alert("Material Code required.");
+                return;
+            }
+            var txtShortText = $("#txtShortText").val();
+            if (txtShortText === "") {
+                isValid = false;
+                alert("Short Text required.");
+                return;
+            }
+            var txtReorderLevel = $("#txtReorderLevel").val();
+            if (txtReorderLevel === "") {
+                isValid = false;
+                alert("Reorder Level required.");
+                return;
+
+            }
+            var txtMinOrderQuantity = $("#txtMinOrderQuantity").val();
+            if (txtMinOrderQuantity === "") {
+                isValid = false;
+                alert("Minimum Order Quantity required.");
+                return;
+            }
+            var txtUnit = $("#txtUnit").val();
+            if (txtUnit === "") {
+                isValid = false;
+                alert("Unit required.");
+                return;
+            }
+            var txtLongText = $("#txtLongText").val();
+            if (txtLongText === "") {
+                isValid = false;
+                alert("Long Text required.");
+                return;
+            }
+
+            if (isValid) {
+
+                SaveMaterial();
+            }
+           
         });
 
         function SaveMaterial() {
@@ -79,8 +160,6 @@
 			var unit = $("#txtUnit").val();
 			var longText = $("#txtLongText").val();
 
-
-            
             var requestData = {
 				MaterialCode: materialCode,
                 ShortText: shortText,
@@ -100,10 +179,12 @@
 				cache: false,
 				dataType: "json",
 				success: function (response) {
-					// Handle the server response
-					if (response.d === "success") {
-						alert("Material submitted successfully!");
-						// Clear form inputs or perform other actions
+					
+                    if (response.d === "success") {
+                        document.getElementById("btnSaveClick").addEventListener("click", function () {
+                            $('#savealert').modal('show');
+                        });
+
 					} else if (response.d.startsWith("error")) {
 						var errorMessage = response.d.substring(6); 
 						alert("Error: " + errorMessage);
@@ -120,6 +201,18 @@
 
             return false;
         }
+
+        document.getElementById("btnCancel").addEventListener("click", function () {
+            $('#cancelConfirmationModal').modal('show');
+        });
+
+        document.getElementById("confirmCancel").addEventListener("click", function () {
+            window.location.href = "Home.aspx";
+        });
+
+        document.getElementById("closeAlertBtn").addEventListener("click", function () {
+            location.reload();
+        });
 
 
     </script>
